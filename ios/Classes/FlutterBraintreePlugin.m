@@ -3,9 +3,12 @@
 #import "BraintreeDropIn.h"
 
 
-@implementation FlutterBraintreePlugin {
-    UIViewController *_viewController;
-}
+@interface FlutterBraintreePlugin ()
+    @property (nonatomic, strong) UIViewController *viewController;
+@end
+
+
+@implementation FlutterBraintreePlugin
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"info.keepinmind.flutter_braintree" binaryMessenger:[registrar messenger]];
@@ -43,10 +46,12 @@
         if (error != nil) {
             flutterResult([FlutterError errorWithCode:[NSString stringWithFormat:@"%li", error.code] message:error.localizedDescription details:nil]);
         } else if (result.cancelled) {
-            flutterResult([FlutterError errorWithCode:@"CANCELLED" message:error.localizedDescription details:nil]);
+            flutterResult([FlutterError errorWithCode:@"CANCELLED" message:@"Purchase process was cancelled." details:nil]);
         } else {
             flutterResult(result.paymentMethod.nonce);
         }
+        
+        [self.viewController dismissViewControllerAnimated:YES completion:nil];
     }];
     
     [_viewController presentViewController:dropIn animated:YES completion:nil];

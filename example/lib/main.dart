@@ -12,6 +12,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _nonce = 'Unknown';
+  final _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +23,15 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(hintText: 'Your client token'),
+              ),
               RaisedButton(
                 child: Text('Pay'),
-                onPressed: _pay,
+                onPressed: () => _pay(_controller.text),
               ),
               Text(_nonce),
             ],
@@ -35,7 +41,17 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void _pay() async {
-    String nonce = await FlutterBraintree.showDropIn('token');
+  void _pay(String token) async {
+    String nonce;
+
+    try {
+      nonce = await FlutterBraintree.showDropIn(token);
+    } on PlatformException catch (e) {
+      nonce = e.message;
+    }
+
+    setState(() {
+      _nonce = nonce;
+    });
   }
 }
