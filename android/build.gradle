@@ -31,4 +31,7 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    dependencies {
+        compile 'com.braintreepayments.api:drop-in:3.7.1'
+    }
 }
