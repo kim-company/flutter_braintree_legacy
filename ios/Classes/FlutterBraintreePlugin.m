@@ -41,7 +41,7 @@
 
 - (void)showDropIn:(NSString *)clientTokenOrTokenizationKey withResult:(FlutterResult)flutterResult {
     BTDropInRequest *request = [[BTDropInRequest alloc] init];
-    BTDropInController *dropIn = [[BTDropInController alloc] initWithAuthorization:clientTokenOrTokenizationKey request:request handler:^(BTDropInController * _Nonnull controller, BTDropInResult * _Nullable result, NSError * _Nullable error) {
+    BTDropInController *dropInController = [[BTDropInController alloc] initWithAuthorization:clientTokenOrTokenizationKey request:request handler:^(BTDropInController * _Nonnull controller, BTDropInResult * _Nullable result, NSError * _Nullable error) {
         
         if (error != nil) {
             flutterResult([FlutterError errorWithCode:[NSString stringWithFormat:@"%li", error.code] message:error.localizedDescription details:nil]);
@@ -54,7 +54,7 @@
         [self.viewController dismissViewControllerAnimated:YES completion:nil];
     }];
     
-    [_viewController presentViewController:dropIn animated:YES completion:nil];
+    [_viewController presentViewController:dropInController animated:YES completion:nil];
 }
 
 @end
