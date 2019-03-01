@@ -15,12 +15,13 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 public class FlutterBraintreePlugin implements MethodCallHandler, PluginRegistry.ActivityResultListener {
-  private final Registrar mRegistrar;
-  private final static int REQUEST_CODE = 1;
+  private final Activity mActivity;
+  private final static int REQUEST_CODE = 11;
+  private Result mResult;
 
   private FlutterBraintreePlugin(Registrar registrar) {
-    this.mRegistrar = registrar;
-    this.mRegistrar.addActivityResultListener(this);
+    this.mActivity = registrar.activity();
+    registrar.addActivityResultListener(this);
   }
 
   public static void registerWith(Registrar registrar) {
@@ -33,12 +34,10 @@ public class FlutterBraintreePlugin implements MethodCallHandler, PluginRegistry
     if (call.method.equals("showDropIn")) {
       String clientToken = call.argument("clientToken");
 
-      DropInRequest dropInRequest = new DropInRequest()
-              .clientToken(clientToken);
+      DropInRequest dropInRequest = new DropInRequest().clientToken(clientToken);
 
-      mRegistrar.activity().startActivityForResult(dropInRequest.getIntent(mRegistrar.activity()), REQUEST_CODE);
-
-      result.success("OK");
+      mResult = result;
+      mActivity.startActivityForResult(dropInRequest.getIntent(mActivity), REQUEST_CODE);
     } else {
       result.notImplemented();
     }
@@ -49,13 +48,15 @@ public class FlutterBraintreePlugin implements MethodCallHandler, PluginRegistry
     if (requestCode == REQUEST_CODE) {
       if (resultCode == Activity.RESULT_OK) {
         DropInResult result = data.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
-        // use the result to update your UI and send the payment method nonce to your server
+        mResult.success(result.getPaymentMethodNonce().getNonce());
       } else if (resultCode == Activity.RESULT_CANCELED) {
-        // the user canceled
+        mResult.error("CANCELLED", "Purchase process was cancelled.", null);
       } else {
-        // handle errors here, an exception may be available in
         Exception error = (Exception) data.getSerializableExtra(DropInActivity.EXTRA_ERROR);
+        mResult.error("ERROR", error.getMessage(), null);
       }
+
+      mResult = null;
 
       return true;
     }
